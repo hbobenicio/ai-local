@@ -1,0 +1,61 @@
+# TODO verificar se o ollama ou outra interface está visualizando os arquivos (cli, open-webui e api)
+# TODO testar devcontainer
+# TODO configurar open-webui pra rodar com usuário sem privilégios
+# TODO restringir cors do open-webui
+
+services:
+  # llamacpp:
+  #   image: ghcr.io/ggml-org/llama.cpp:full
+  #   volumes:
+  #     - '/tmp/models:/models'
+  #   entrypoint: ""
+  #   command: ["/bin/bash"]
+
+  ollama:
+    build:
+      context: .
+      dockerfile: ./docker/ollama-nonroot/Dockerfile
+    gpus: all
+    ports:
+      # Ollama API Protocol: https://docs.ollama.com/api/introduction
+      - "11434:11434"
+    environment:
+      OLLAMA_NO_CLOUD: "1"   # Disable Ollama cloud features (remote inference and web search)
+      OLLAMA_HOST: "0.0.0.0" # IP Address for the ollama server (default 127.0.0.1:11434)
+    volumes:
+      - 'ollama:/home/ubuntu/.ollama'
+      - './data/:/home/ubuntu/data'
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.8.6
+    depends_on:
+      - ollama
+    ports:
+      - "8080:8080"
+    environment:
+      # GLOBAL_LOG_LEVEL: DEBUG
+      OLLAMA_BASE_URL: http://ollama:11434
+      # CORS_ALLOW_ORIGIN: http://ollama:11434
+
+      # https://docs.openwebui.com/tutorials/maintenance/offline-mode/
+      HF_HUB_OFFLINE: "1"  # https://github.com/open-webui/open-webui?tab=readme-ov-file#offline-mode
+      OFFLINE_MODE: 'true' # https://docs.openwebui.com/getting-started/advanced-topics/hardening#offline-mode
+
+      # Disable automatic model updates
+      RAG_EMBEDDING_MODEL_AUTO_UPDATE: 'false'
+      RAG_RERANKING_MODEL_AUTO_UPDATE: 'false'
+      WHISPER_MODEL_AUTO_UPDATE: 'false'
+
+      # Set to false to prevent automatic pip installs from tool/function frontmatter
+      ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS: 'false'  # https://docs.openwebui.com/getting-started/advanced-topics/hardening#dependency-installation
+      WEBUI_AUTH: 'False'  # https://docs.openwebui.com/getting-started/quick-start/#single-user-mode-no-login
+    volumes:
+      - 'open-webui:/app/backend/data'
+
+volumes:
+  ollama:
+  open-webui:
+
+networks:
+  default:
+    internal: true
