@@ -2,14 +2,23 @@
 # TODO testar devcontainer
 # TODO configurar open-webui pra rodar com usuário sem privilégios
 # TODO restringir cors do open-webui
+# TODO automatizar/simplificar provisionamento de volumes
 
 services:
-  # llamacpp:
-  #   image: ghcr.io/ggml-org/llama.cpp:full
-  #   volumes:
-  #     - '/tmp/models:/models'
-  #   entrypoint: ""
-  #   command: ["/bin/bash"]
+  llamacpp:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda  # full, server, server-cuda
+    gpus: all
+    volumes:
+      - 'llamacpp:/models'
+    ports:
+      - '8081:8081'
+    environment:
+      LLAMA_ARG_HOST: '0.0.0.0'
+      LLAMA_ARG_PORT: '8081'
+      LLAMA_ARG_HF_REPO: 'ggml-org/gemma-4-E2B-it-GGUF'
+      LLAMA_LOG_VERBOSITY: '4'
+      LLAMA_CACHE: '/models/'
+      #LLAMA_OFFLINE
 
   ollama:
     build:
@@ -55,6 +64,7 @@ services:
 volumes:
   ollama:
   open-webui:
+  llamacpp:
 
 networks:
   default:
