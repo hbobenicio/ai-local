@@ -1,71 +1,112 @@
-# TODO verificar se o ollama ou outra interface está visualizando os arquivos (cli, open-webui e api)
-# TODO testar devcontainer
-# TODO configurar open-webui pra rodar com usuário sem privilégios
-# TODO restringir cors do open-webui
-# TODO automatizar/simplificar provisionamento de volumes
-
 services:
   llamacpp:
-    image: ghcr.io/ggml-org/llama.cpp:server-cuda  # full, server, server-cuda
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda  # Outras opções: full, server, server-cuda
     gpus: all
     volumes:
-      - 'llamacpp:/models'
-    ports:
-      - '8081:8081'
-    environment:
-      LLAMA_ARG_HOST: '0.0.0.0'
-      LLAMA_ARG_PORT: '8081'
-      LLAMA_ARG_HF_REPO: 'ggml-org/gemma-4-E2B-it-GGUF'
-      LLAMA_LOG_VERBOSITY: '4'
-      LLAMA_CACHE: '/models/'
-      #LLAMA_OFFLINE
+      # Models
+      - '${LLM_MODELS_DIR}:/models:ro'
 
-  ollama:
+      # Configs
+      - './docker/llama-cpp/webui.config.json:/config/webui.config.json:ro'
+      - './docker/llama-cpp/qwen3-4b.ini:/config/qwen3-4b.ini:ro'
+
+    ports:
+      - '12434:12434'
+    environment:
+      # Reference for all configs: https://github.com/ggml-org/llama.cpp/blob/master/tools/server/README.md
+      LLAMA_OFFLINE: 'true'
+      LLAMA_ARG_HOST: '0.0.0.0'
+      LLAMA_ARG_PORT: '12434'
+      LLAMA_ARG_CTX_SIZE: '10000'
+
+      # LLAMA_ARG_MODEL: "/models/gemma-4-26B-A4B-it-Q4_K_M.gguf"
+      # LLAMA_ARG_MODEL: "/models/gemma-4-E4B-it-Q8_0.gguf"
+      # LLAMA_ARG_MODEL: "/models/gemma-4-E2B-it-Q8_0.gguf"
+      #LLAMA_ARG_MODEL: "/models/Qwen3.6-35B-A3B-Q8_0.gguf"
+      #LLAMA_ARG_MODEL: "/models/Qwen3.6-35B-A3B-MXFP4_MOE.gguf"
+      #LLAMA_ARG_MODEL: "/models/qwen2.5-coder-1.5b-instruct-q8_0.gguf"
+      LLAMA_ARG_MODEL: "/models/${LLM_MODEL}"
+      LLAMA_ARG_MODELS_PRESET: "/config/qwen3-4b.ini"
+
+      # Set the verbosity threshold.
+      # Messages with a higher verbosity will be ignored. Values:
+      # - 0: generic output
+      # - 1: error
+      # - 2: warning
+      # - 3: info (Default)
+      # - 4: debug
+      LLAMA_LOG_VERBOSITY: '3'
+
+      # JSON file that provides default WebUI settings (overrides WebUI defaults)
+      LLAMA_ARG_WEBUI_CONFIG_FILE: '/config/webui.config.json'
+
+      # experimental: whether to enable MCP CORS proxy - do not enable in untrusted environments (default: disabled)
+      LLAMA_ARG_WEBUI_MCP_PROXY: 'true'
+
+      # Directory containing models for the router server (default: disabled)
+      LLAMA_ARG_MODELS_DIR: '/models/'
+
+      # Caches are where downloaded models should be saved
+      LLAMA_CACHE: '/models/'
+
+      # for router server, maximum number of models to load simultaneously (default: 4, 0 = unlimited)
+      LLAMA_ARG_MODELS_MAX: '2'
+
+      # Exposes a Prometheus metrics endpoint (/metrics)
+      LLAMA_ARG_ENDPOINT_METRICS: 'true'
+
+      # experimental: whether to enable built-in tools for AI agents
+      # do not enable in untrusted environments (default: no tools)
+      # specify "all" to enable all tools
+      # available tools: read_file, file_glob_search, grep_search, exec_shell_command, write_file, edit_file, apply_diff, get_datetime
+      # LLAMA_ARG_TOOLS: 'write_file'  # all
+      # LLAMA_ARG_TOOLS: 'all'
+
+      # max. number of layers to store in VRAM, either an exact number, 'auto', or 'all' (default: auto)
+      LLAMA_ARG_N_GPU_LAYERS: '26'
+
+      # keep all Mixture of Experts (MoE) weights in the CPU
+      # LLAMA_ARG_CPU_MOE: 'true'
+
+      # keep the Mixture of Experts (MoE) weights of the first N layers in the CPU
+      #LLAMA_ARG_N_CPU_MOE: '30'
+
+      # Loads the whole model to RAM at once (no pagefaults, more RAM usage)
+      # LLAMA_ARG_MMAP: 'false'
+
+      # Warms up the model before readiness
+      LLAMA_ARG_WARMUP: 'false'
+
+  opencode:
     build:
       context: .
-      dockerfile: ./docker/ollama-nonroot/Dockerfile
-    gpus: all
-    ports:
-      # Ollama API Protocol: https://docs.ollama.com/api/introduction
-      - "11434:11434"
-    environment:
-      OLLAMA_NO_CLOUD: "1"   # Disable Ollama cloud features (remote inference and web search)
-      OLLAMA_HOST: "0.0.0.0" # IP Address for the ollama server (default 127.0.0.1:11434)
-    volumes:
-      - 'ollama:/home/ubuntu/.ollama'
-      - './data/:/home/ubuntu/data'
-
-  open-webui:
-    image: ghcr.io/open-webui/open-webui:v0.8.6
+      dockerfile: docker/opencode/Dockerfile
     depends_on:
-      - ollama
-    ports:
-      - "8080:8080"
+      - llamacpp
     environment:
-      # GLOBAL_LOG_LEVEL: DEBUG
-      OLLAMA_BASE_URL: http://ollama:11434
-      # CORS_ALLOW_ORIGIN: http://ollama:11434
-
-      # https://docs.openwebui.com/tutorials/maintenance/offline-mode/
-      HF_HUB_OFFLINE: "1"  # https://github.com/open-webui/open-webui?tab=readme-ov-file#offline-mode
-      OFFLINE_MODE: 'true' # https://docs.openwebui.com/getting-started/advanced-topics/hardening#offline-mode
-
-      # Disable automatic model updates
-      RAG_EMBEDDING_MODEL_AUTO_UPDATE: 'false'
-      RAG_RERANKING_MODEL_AUTO_UPDATE: 'false'
-      WHISPER_MODEL_AUTO_UPDATE: 'false'
-
-      # Set to false to prevent automatic pip installs from tool/function frontmatter
-      ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS: 'false'  # https://docs.openwebui.com/getting-started/advanced-topics/hardening#dependency-installation
-      WEBUI_AUTH: 'False'  # https://docs.openwebui.com/getting-started/quick-start/#single-user-mode-no-login
+      OPENCODE_DISABLE_MODELS_FETCH: '1'
+      OPENCODE_OFFLINE: '1'
+      OPENCODE_AIRGAPPED: '1'
     volumes:
-      - 'open-webui:/app/backend/data'
+      - './workspace/:/workspace'  # Your development workspace
 
-volumes:
-  ollama:
-  open-webui:
-  llamacpp:
+  mcp:
+    profiles:
+      - mcp
+    image: python:3.14.2
+    environment:
+      MCP_SERVER_HOST: '0.0.0.0'
+    ports:
+      - '8083:8083'
+    volumes:
+      - './mcp:/app/mcp/:ro'
+    command: ["bash", "-c", 'pip install -r /app/mcp/requirements.txt && python /app/mcp/main.py']
 
 networks:
   default:
-    internal: true
+    driver: bridge
+    internal: false
+    # By disabling ip masquerade, the NAT table is not set up so internet access is blocked
+    # and host access keeps working
+    driver_opts:
+      com.docker.network.bridge.enable_ip_masquerade: 'false'

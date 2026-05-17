@@ -1,0 +1,18 @@
+{
+  "autoupdate": false,
+  "model": "my-local-llm/qwen3-4b",
+  "small_model": "my-local-llm/qwen3-4b",
+  "provider": {
+    "my-local-llm": {
+      "name": "My Local LLM",
+      "options": {
+        "baseURL": "http://llamacpp:12434/v1"
+      },
+      "models": {
+        "qwen3-4b": {
+          "name": "qwen3-4b"
+        }
+      }
+    }
+  }
+}

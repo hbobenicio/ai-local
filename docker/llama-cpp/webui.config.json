@@ -1,0 +1,13 @@
+{
+    "systemMessage": "you are an assistant.\nyou can use tools.\nprovide short answers.",
+    "showSystemMessage": true,
+    "showThoughtInProgress": true,
+    "disableReasoningParsing": false,
+    "excludeReasoningFromContext": false,
+    "mcpServers": "[{\"id\":\"375d83e7-a4b5-49d9-a208-4b5082624ef1\",\"enabled\":true,\"url\":\"http://mcp:8083/mcp\",\"requestTimeoutSeconds\":300,\"useProxy\":true}]",
+    "mcpServerUsageStats": "{}",
+    "agenticMaxTurns": 10,
+    "agenticMaxToolPreviewLines": 25,
+    "showToolCallInProgress": true,
+    "alwaysShowAgenticTurns": true
+}
