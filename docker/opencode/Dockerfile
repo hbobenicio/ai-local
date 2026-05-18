@@ -8,10 +8,10 @@ RUN apt update
 RUN apt install nodejs npm -y
 
 USER ubuntu
-RUN npm install -g opencode-ai
+RUN npm install -g opencode-ai @earendil-works/pi-coding-agent
 
 COPY --chown=ubuntu:ubuntu ./docker/opencode/opencode.json /home/ubuntu/.config/opencode/opencode.json
-
+COPY --chown=ubuntu:ubuntu ./docker/opencode/pi.json /home/ubuntu/.pi/agent/models.json
 # TODO
 # WORKDIR /workspace
 

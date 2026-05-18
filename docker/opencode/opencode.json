@@ -14,5 +14,13 @@
         }
       }
     }
+  },
+  "skills": {
+    "dynamic-map": false,
+    "finance": false,
+    "local": false,
+    "shopping": false,
+    "sports": false,
+    "travel": false
   }
 }

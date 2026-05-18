@@ -87,6 +87,9 @@ services:
       OPENCODE_DISABLE_MODELS_FETCH: '1'
       OPENCODE_OFFLINE: '1'
       OPENCODE_AIRGAPPED: '1'
+
+      PI_OFFLINE: '1'    # Disable startup network operations when set to 1/true/yes
+      PI_TELEMETRY: '0'  # Override install telemetry when set to 1/true/yes or 0/false/n
     volumes:
       - './workspace/:/workspace'  # Your development workspace
 
