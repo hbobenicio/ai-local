@@ -1,0 +1,14 @@
+{
+    "enableInstallTelemetry": false,
+    "providers": {
+        "local-llm": {
+            "baseUrl": "http://localhost:12434/v1",
+            "api": "openai-completions",
+            "apiKey": "dummy",
+            "models": [
+                { "id": "qwen/qwen3-4b" },
+                { "id": "qwen/qwen3-1.7b" }
+            ]
+        }
+    }
+}
