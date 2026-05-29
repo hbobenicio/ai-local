@@ -1,28 +1,29 @@
 package mysimpleagent.utils;
 
 import mysimpleagent.Config;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class ResourceUtils {
-    public static String loadResourceAsString(String resourcePath) {
-        var url = Config.class.getClassLoader().getResource(resourcePath);
-        if (url == null) {
-            var msg = String.format("Resource not found: %s", resourcePath);
-            throw new AssertionError(msg);
-        }
+    private static final Logger logger = LoggerFactory.getLogger(ResourceUtils.class.getSimpleName());
 
-        try {
-            URI uri = url.toURI();
-            return Files.readString(Path.of(uri), StandardCharsets.UTF_8);
-        } catch (URISyntaxException | IOException e) {
-            throw new AssertionError(e);
+    public static String loadResourceAsString(String resourcePath) {
+        logger.atInfo().addKeyValue("path", resourcePath).log("carregando recurso...");
+        try (InputStream is = Config.class.getResourceAsStream(resourcePath)) {
+            if (is == null) {
+                throw new FileNotFoundException(resourcePath);
+            }
+            byte[] contents = is.readAllBytes();
+            var result = new String(contents, StandardCharsets.UTF_8);
+            logger.atInfo().addKeyValue("path", resourcePath).log("recurso carregado com sucesso.");
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }

@@ -15,17 +15,21 @@ public class Config {
 
     public static Config loadFromEnv() {
         var cfg = new Config();
-        cfg.llmBaseUrl = Optional.ofNullable(System.getenv("LLM_BASE_URL")).orElse("http://localhost:12434/v1");
+        cfg.llmBaseUrl = Optional.ofNullable(System.getenv("LLM_BASE_URL"))
+                .map(String::trim)
+                .orElse("http://localhost:12434/v1");
         logger.atInfo()
                 .addKeyValue("LLM_BASE_URL", cfg.llmBaseUrl)
                 .log("value loaded");
 
-        cfg.llmModelName = Optional.ofNullable(System.getenv("LLM_MODEL_NAME")).orElse("gemma4:E2B");
+        cfg.llmModelName = Optional.ofNullable(System.getenv("LLM_MODEL_NAME"))
+                .map(String::trim)
+                .orElse("qwen/qwen3-4b");
         logger.atInfo()
                 .addKeyValue("LLM_MODEL_NAME", cfg.llmModelName)
                 .log("value loaded");
 
-        cfg.llmSystemPrompt = ResourceUtils.loadResourceAsString("system.prompt.txt");
+        cfg.llmSystemPrompt = ResourceUtils.loadResourceAsString("/system.prompt.txt");
         logger.atInfo().log("system prompt loaded");
         return cfg;
     }
