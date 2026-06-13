@@ -1,0 +1,14 @@
+{
+  "permission": {
+    "*": "ask",
+    "path": {
+      "*.env": "deny",
+      "*.env.*": "deny",
+    },
+    "bash": {
+      "rm*": "deny",
+      "sudo *": "deny"
+    }
+  }
+}
+

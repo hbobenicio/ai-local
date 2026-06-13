@@ -16,9 +16,10 @@ WORKDIR /home/node/workspace
 
 ENV PI_SKIP_VERSION_CHECK=1
 ENV PI_OFFLINE=1
-RUN npm install -g '@earendil-works/pi-coding-agent@0.74.0'
-# RUN pi install "npm:pi-permission-system"
+RUN npm install -g '@earendil-works/pi-coding-agent@0.78.0'
+RUN pi install "npm:pi-permission-system"
 RUN pi install "npm:@plannotator/pi-extension"
+#RUN pi install "npm:context-mode"
 
 RUN ln -s /usr/bin/fdfind /home/node/.npm-global/bin/fd
 

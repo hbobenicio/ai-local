@@ -6,8 +6,9 @@
             "api": "openai-completions",
             "apiKey": "dummy",
             "models": [
-                { "id": "qwen/qwen3-4b" },
-                { "id": "qwen/qwen3-1.7b" }
+                { "id": "qwen/qwen3-4b", "contextWindow": 32768, "maxTokens": 15000 },
+                { "id": "qwen/qwen3-1.7b", "contextWindow": 32768 },
+                { "id": "qwen/qwen3.6-35b-a3b", "contextWindow": 262144 }
             ]
         }
     }
