@@ -9,13 +9,6 @@
                 {
                     "id": "qwen/qwen3-4b",
                     "reasoning": true,
-                    "thinkingLevelMap": {
-                        "minimal": "on",
-                        "low": "on",
-                        "medium": "on",
-                        "high": "on",
-                        "xhigh": "on"
-                    }
                     "contextWindow": 32768,
                     "maxTokens": 6000
                 },
