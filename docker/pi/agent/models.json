@@ -6,7 +6,19 @@
             "api": "openai-completions",
             "apiKey": "dummy",
             "models": [
-                { "id": "qwen/qwen3-4b", "reasoning": true, "contextWindow": 32768, "maxTokens": 6000 },
+                {
+                    "id": "qwen/qwen3-4b",
+                    "reasoning": true,
+                    "thinkingLevelMap": {
+                        "minimal": "on",
+                        "low": "on",
+                        "medium": "on",
+                        "high": "on",
+                        "xhigh": "on"
+                    }
+                    "contextWindow": 32768,
+                    "maxTokens": 6000
+                },
                 { "id": "qwen/qwen3-1.7b", "reasoning": true, "contextWindow": 32768 },
                 { "id": "qwen/qwen3.6-35b-a3b", "reasoning": true, "contextWindow": 262144 }
             ]
